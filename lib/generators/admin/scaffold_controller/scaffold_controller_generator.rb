@@ -13,8 +13,6 @@ module Admin
 
       check_class_collision suffix: "Controller"
 
-      check_class_collision suffix: "ControllerTest"
-
       check_class_collision suffix: "Helper"
 
       class_option :orm, banner: "NAME", type: :string, required: true,
@@ -38,22 +36,8 @@ module Admin
         super
       end
 
-      hook_for :resource_route, in: :rails do |resource_route|
-        invoke resource_route, [prefixed_class_name]
-      end
-
       def create_controller_files
-        # I think there should be a better way to detect if jbuilder is in use
-        # If you know it, please let me know
-        if Gem::Specification.find_all_by_name('jbuilder').length >= 1
-          template "controllers/jbuilder/controller.rb.erb", File.join('app/controllers', prefix, class_path, "#{controller_file_name}_controller.rb")
-        else
-          template "controllers/railties/controller.rb.erb", File.join('app/controllers', prefix, class_path, "#{controller_file_name}_controller.rb")
-        end
-      end
-
-      def create_test_files
-        template "tests/test_unit/functional_test.rb.erb", File.join("test/controllers", prefix, controller_class_path, "#{controller_file_name}_controller_test.rb")
+        template "controllers/railties/controller.rb.erb", File.join('app/controllers', prefix, class_path, "#{controller_file_name}_controller.rb")
       end
 
       hook_for :helper, in: :rails do |helper|
@@ -73,13 +57,6 @@ module Admin
             template_path = "views/#{handler}/#{filename}.erb"
           end
           template template_path, File.join("app/views", prefix, controller_file_path, filename)
-        end
-
-        # I think there should be a better way to detect if jbuilder is in use
-        if Gem::Specification.find_all_by_name('jbuilder').length >= 1
-          %w(index show).each do |view|
-            template "views/jbuilder/#{view}.json.jbuilder.erb", File.join("app/views", prefix, controller_file_path, "#{view}.json.jbuilder")
-          end
         end
       end
 
